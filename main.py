@@ -11,9 +11,17 @@ def display_books(db: DB, book_ids):
     for key in book_ids:
         status = ""
         if key in db.reservations_by_book:
-            status = f"[Borrowed by {db.reservations_by_book[key]['email']}]"
+            status = f"[Reserved by {db.reservations_by_book[key]['email']}]"
         print(f"{key}: {db.books[key]['title']} by {db.books[key]['author']} {status}")
     print()
+
+
+def display_reservations(db: DB):
+    for res_id, reservation in db.reservations.items():
+        book = db.books[reservation["book_id"]]
+        print(
+            f"res_id: {res_id} - {book['title']} - reserved by {reservation['email']}"
+        )
 
 
 def select_books(db: DB):
@@ -23,24 +31,24 @@ def select_books(db: DB):
             choices = list(map(int, choices.split(",")))
 
             invalid_choices = []
-            borrowed = []
+            reserved = []
             for choice in choices:
                 if choice not in db.books:
                     invalid_choices.append(choice)
 
                 if choice in db.reservations_by_book:
-                    borrowed.append(choice)
+                    reserved.append(choice)
 
-            canborrow = True
+            canreserve = True
             if invalid_choices:
                 print(f"Books with IDs: ({invalid_choices}) are not availible")
-                canborrow = False
+                canreserve = False
 
-            if borrowed:
-                print(f"Books with IDs: ({borrowed}) are already borrowed!")
-                canborrow = False
+            if reserved:
+                print(f"Books with IDs: ({reserved}) are already reserved!")
+                canreserve = False
 
-            if not canborrow:
+            if not canreserve:
                 continue
 
             return choices
@@ -90,13 +98,18 @@ def run():
     logged_user_email = input("Input your email: ")
 
     while True:
-        display_books(db, db.books.keys())
-        book_choices = select_books(db)
-        confirm_reservation(db, book_choices, logged_user_email)
-        again = input("Do you want to reserve another book? (yes/no): ").lower()
-        if again != "yes":
+        print("\n1: Make a reservation\n2: View reservations\n3: Exit")
+        choice = input("Select an option: ")
+
+        if choice == "1":
+            display_books(db, db.books.keys())
+            book_choices = select_books(db)
+            confirm_reservation(db, book_choices, logged_user_email)
+        elif choice == "2":
+            display_reservations(db)
+        else:
             print("Thank you for using the Library System. Goodbye!")
-            break
+            exit()
 
 
 if __name__ == "__main__":
