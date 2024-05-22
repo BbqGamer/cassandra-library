@@ -8,6 +8,7 @@ class DB(NamedTuple):
 
 
 def display_books(db: DB, book_ids):
+    print("[BOOKS]")
     for key in book_ids:
         status = ""
         if key in db.reservations_by_book:
@@ -56,6 +57,22 @@ def select_books(db: DB):
             print("Invalid input. Please enter a comma separated list of numbers.")
 
 
+def cancel_reservation(db: DB, user_email: str, res_id: int):
+    if res_id not in db.reservations:
+        print(f"Reservation with id {res_id} does not exist!")
+        return
+
+    res = db.reservations[res_id]
+    if res["email"] != user_email:
+        print(f"Reservation with id {res_id} doesn't belong to you")
+        return
+
+    book_id = res["book_id"]
+    del db.reservations_by_book[book_id]
+    del db.reservations[res_id]
+    print(f"Reservation with id {res_id} cancelled")
+
+
 def confirm_reservation(db: DB, book_choices: List[int], user_email):
     print()
     print("[Reservation]")
@@ -98,7 +115,9 @@ def run():
     logged_user_email = input("Input your email: ")
 
     while True:
-        print("\n1: Make a reservation\n2: View reservations\n3: Exit")
+        print(
+            "\n1: Make a reservation\n2: View reservations\n3: Cancel reservation\n4: Exit"
+        )
         choice = input("Select an option: ")
 
         if choice == "1":
@@ -107,6 +126,12 @@ def run():
             confirm_reservation(db, book_choices, logged_user_email)
         elif choice == "2":
             display_reservations(db)
+        elif choice == "3":
+            try:
+                res_id = int(input("Specify reservation to cancel: "))
+                cancel_reservation(db, logged_user_email, res_id)
+            except ValueError:
+                print("Incorrect reservation id")
         else:
             print("Thank you for using the Library System. Goodbye!")
             exit()
