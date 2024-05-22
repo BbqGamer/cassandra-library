@@ -1,19 +1,21 @@
-from typing import List, NamedTuple
+from typing import List
+
+from db import DB
 
 
-class DB(NamedTuple):
-    books: dict
-    reservations: dict
-    reservations_by_book: dict
-
-
-def display_books(db: DB, book_ids):
+def display_books(db: DB, book_ids=None):
     print("[BOOKS]")
-    for key in book_ids:
+    if book_ids is None:
+        books = db.select_all_books()
+    else:
+        books = db.select_books_by_ids(book_ids)
+
+    for book_id, title, author in books:
         status = ""
-        if key in db.reservations_by_book:
-            status = f"[Reserved by {db.reservations_by_book[key]['email']}]"
-        print(f"{key}: {db.books[key]['title']} by {db.books[key]['author']} {status}")
+        reservation = db.get_reservation_by_book(book_id)
+        if reservation:
+            status = f"[Reserved by {reservation[2]}]"
+        print(f"{book_id}: {title} by {author} {status}")
     print()
 
 
@@ -86,7 +88,7 @@ def confirm_reservation(db: DB, book_choices: List[int], user_email):
                 db.reservations[newreskey] = {"book_id": key, "email": user_email}
                 db.reservations_by_book[key] = {"id": newreskey, "email": user_email}
 
-            print(f"Success! You reserved {len(book_choices)} books.")
+            print(f"You reserved {len(book_choices)} books.")
             break
         elif confirmation == "no":
             print("Purchase cancelled.")
@@ -95,21 +97,8 @@ def confirm_reservation(db: DB, book_choices: List[int], user_email):
             print("Invalid input. Please enter 'yes' or 'no'.")
 
 
-def seed() -> DB:
-    books = {
-        1: {"title": "1984", "author": "George Orwell"},
-        2: {"title": "To Kill a Mockingbird", "author": "Harper Lee"},
-        3: {"title": "The Great Gatsby", "author": "F. Scott Fitzgerald"},
-    }
-
-    reservations = {1: {"book_id": 2, "email": "foo@bar"}}
-    reservations_by_book = {2: {"id": 1, "email": "foo@bar"}}
-
-    return DB(books, reservations, reservations_by_book)
-
-
 def run():
-    db = seed()
+    db = DB()
 
     print("Welcome to the Library System!")
     logged_user_email = input("Input your email: ")
