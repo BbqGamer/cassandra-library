@@ -39,7 +39,7 @@ def select_books(db: DB):
                 if choice not in {x.id for x in db.select_all_books()}:
                     invalid_choices.append(choice)
 
-                if db.select_reservation_by_book(choice) is None:
+                if db.select_reservation_by_book(choice) is not None:
                     reserved.append(choice)
 
             canreserve = True
