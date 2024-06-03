@@ -6,7 +6,6 @@ from db import DB
 
 
 def display_books(db: DB, book_ids=None):
-    print("\n[BOOKS]")
     if book_ids is None:
         books = db.select_all_books()
     else:
@@ -25,9 +24,7 @@ def display_reservations(db: DB):
     print("\n[RESERVATIONS]")
     for reservation in db.select_all_reservations():
         book = db.select_books_by_ids([reservation.book_id])[0]
-        print(
-            f"res_id: {reservation.id} - {book.title} - reserved by {reservation.email}"
-        )
+        print(f"{reservation.id} - {book.title} - reserved by {reservation.email}")
 
 
 def select_books(db: DB):
@@ -73,6 +70,10 @@ def cancel_reservation(db: DB, user_email: str, res_id: uuid.UUID):
         return
 
     reservation = db.select_reservation_by_id(res_id)
+    if reservation is None:
+        print(f"Reservation with id {res_id} doesn't exist")
+        return
+
     if reservation.email != user_email:
         print(f"Reservation with id {res_id} doesn't belong to you")
         return
@@ -82,8 +83,7 @@ def cancel_reservation(db: DB, user_email: str, res_id: uuid.UUID):
 
 
 def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email):
-    print()
-    print("[Reservation]")
+    print("\n[CHOICES]")
     display_books(db, book_choices)
 
     while True:
@@ -117,6 +117,7 @@ def run():
         choice = input("Select an option: ")
 
         if choice == "1":
+            print("\n[BOOKS]")
             display_books(db)
             book_choices = select_books(db)
             if book_choices:
