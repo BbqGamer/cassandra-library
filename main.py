@@ -4,7 +4,7 @@ from db import DB
 
 
 def display_books(db: DB, book_ids=None):
-    print("[BOOKS]")
+    print("\n[BOOKS]")
     if book_ids is None:
         books = db.select_all_books()
     else:
@@ -20,6 +20,7 @@ def display_books(db: DB, book_ids=None):
 
 
 def display_reservations(db: DB):
+    print("\n[RESERVATIONS]")
     for reservation in db.select_all_reservations():
         book = db.select_books_by_ids([reservation.book_id])[0]
         print(
@@ -30,7 +31,12 @@ def display_reservations(db: DB):
 def select_books(db: DB):
     while True:
         try:
-            choices = input("Select books by enetring comma separated list of IDs: ")
+            choices = input(
+                "Select books by enetring comma separated list of IDs (or empty list to cancel): "
+            )
+
+            if not choices:
+                break
             choices = list(map(int, choices.split(",")))
 
             invalid_choices = []
@@ -98,6 +104,9 @@ def run():
 
     print("Welcome to the Library System!")
     logged_user_email = input("Input your email: ")
+    if not logged_user_email:
+        print("Email should not be empty")
+        exit()
 
     while True:
         print(
@@ -108,13 +117,18 @@ def run():
         if choice == "1":
             display_books(db)
             book_choices = select_books(db)
-            confirm_reservation(db, book_choices, logged_user_email)
+            if book_choices:
+                confirm_reservation(db, book_choices, logged_user_email)
         elif choice == "2":
             display_reservations(db)
         elif choice == "3":
+            display_reservations(db)
             try:
-                res_id = int(input("Specify reservation to cancel: "))
-                cancel_reservation(db, logged_user_email, res_id)
+                res_id = input(
+                    "\nSpecify id of reservation to remove (or empty string to cancel operation): "
+                )
+                if res_id:
+                    cancel_reservation(db, logged_user_email, int(res_id))
             except ValueError:
                 print("Incorrect reservation id")
         elif choice == "4":
