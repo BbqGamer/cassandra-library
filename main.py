@@ -1,3 +1,4 @@
+import uuid
 from typing import List
 
 from cassandra_db import CassandraDB
@@ -33,12 +34,12 @@ def select_books(db: DB):
     while True:
         try:
             choices = input(
-                "Select books by enetring comma separated list of IDs (or empty list to cancel): "
+                "Select books by enetring comma separated list of UUIDs (or empty list to cancel): "
             )
 
             if not choices:
                 break
-            choices = list(map(int, choices.split(",")))
+            choices = list(map(uuid.UUID, choices.split(",")))
 
             invalid_choices = []
             reserved = []
@@ -66,7 +67,7 @@ def select_books(db: DB):
             print("Invalid input. Please enter a comma separated list of numbers.")
 
 
-def cancel_reservation(db: DB, user_email: str, res_id: int):
+def cancel_reservation(db: DB, user_email: str, res_id: uuid.UUID):
     if res_id not in {res.id for res in db.select_all_reservations()}:
         print(f"Reservation with id {res_id} does not exist!")
         return
@@ -80,7 +81,7 @@ def cancel_reservation(db: DB, user_email: str, res_id: int):
     print(f"Reservation with id {res_id} cancelled")
 
 
-def confirm_reservation(db: DB, book_choices: List[int], user_email):
+def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email):
     print()
     print("[Reservation]")
     display_books(db, book_choices)
@@ -129,7 +130,7 @@ def run():
                     "\nSpecify id of reservation to remove (or empty string to cancel operation): "
                 )
                 if res_id:
-                    cancel_reservation(db, logged_user_email, int(res_id))
+                    cancel_reservation(db, logged_user_email, uuid.UUID(res_id))
             except ValueError:
                 print("Incorrect reservation id")
         elif choice == "4":

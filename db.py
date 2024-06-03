@@ -1,15 +1,17 @@
 from typing import NamedTuple, Optional, Protocol
 
+from cassandra.cluster import uuid
+
 
 class Book(NamedTuple):
-    id: int
+    id: uuid.UUID
     title: str
     author: str
 
 
 class Reservation(NamedTuple):
-    id: int
-    book_id: int
+    id: uuid.UUID
+    book_id: uuid.UUID
     email: str
 
 
@@ -26,7 +28,7 @@ class DB(Protocol):
     def select_all_reservations(self) -> list[Reservation]:
         ...
 
-    def select_reservation_by_id(self, res_id) -> Reservation:
+    def select_reservation_by_id(self, res_id) -> Optional[Reservation]:
         ...
 
     # Write methods
