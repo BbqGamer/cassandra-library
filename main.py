@@ -12,18 +12,18 @@ def display_books(db: DB, book_ids=None):
 
     for book_id, title, author in books:
         status = ""
-        reservation = db.get_reservation_by_book(book_id)
+        reservation = db.select_reservation_by_book(book_id)
         if reservation:
-            status = f"[Reserved by {reservation[2]}]"
+            status = f"[Reserved by {reservation.email}]"
         print(f"{book_id}: {title} by {author} {status}")
     print()
 
 
 def display_reservations(db: DB):
-    for res_id, reservation in db.reservations.items():
-        book = db.books[reservation["book_id"]]
+    for reservation in db.select_all_reservations():
+        book = db.select_books_by_ids([reservation.book_id])[0]
         print(
-            f"res_id: {res_id} - {book['title']} - reserved by {reservation['email']}"
+            f"res_id: {reservation.id} - {book.title} - reserved by {reservation.email}"
         )
 
 
@@ -36,10 +36,10 @@ def select_books(db: DB):
             invalid_choices = []
             reserved = []
             for choice in choices:
-                if choice not in db.books:
+                if choice not in {x.id for x in db.select_all_books()}:
                     invalid_choices.append(choice)
 
-                if choice in db.reservations_by_book:
+                if db.select_reservation_by_book(choice) is None:
                     reserved.append(choice)
 
             canreserve = True
@@ -60,18 +60,16 @@ def select_books(db: DB):
 
 
 def cancel_reservation(db: DB, user_email: str, res_id: int):
-    if res_id not in db.reservations:
+    if res_id not in {res.id for res in db.select_all_reservations()}:
         print(f"Reservation with id {res_id} does not exist!")
         return
 
-    res = db.reservations[res_id]
-    if res["email"] != user_email:
+    reservation = db.select_reservation_by_id(res_id)
+    if reservation.email != user_email:
         print(f"Reservation with id {res_id} doesn't belong to you")
         return
 
-    book_id = res["book_id"]
-    del db.reservations_by_book[book_id]
-    del db.reservations[res_id]
+    db.delete_reservation(res_id)
     print(f"Reservation with id {res_id} cancelled")
 
 
@@ -84,9 +82,7 @@ def confirm_reservation(db: DB, book_choices: List[int], user_email):
         confirmation = input("Confirm the above reservation? (yes/no): ")
         if confirmation == "yes":
             for key in book_choices:
-                newreskey = max(db.reservations.keys()) + 1
-                db.reservations[newreskey] = {"book_id": key, "email": user_email}
-                db.reservations_by_book[key] = {"id": newreskey, "email": user_email}
+                db.add_new_reservation(key, user_email)
 
             print(f"You reserved {len(book_choices)} books.")
             break
@@ -110,7 +106,7 @@ def run():
         choice = input("Select an option: ")
 
         if choice == "1":
-            display_books(db, db.books.keys())
+            display_books(db)
             book_choices = select_books(db)
             confirm_reservation(db, book_choices, logged_user_email)
         elif choice == "2":
