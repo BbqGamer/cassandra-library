@@ -1,6 +1,7 @@
 from typing import List
 
 from db import DB
+from fake_db import FakeDB
 
 
 def display_books(db: DB, book_ids=None):
@@ -100,7 +101,7 @@ def confirm_reservation(db: DB, book_choices: List[int], user_email):
 
 
 def run():
-    db = DB()
+    db = FakeDB()
 
     print("Welcome to the Library System!")
     logged_user_email = input("Input your email: ")
