@@ -117,9 +117,11 @@ def run():
                 cancel_reservation(db, logged_user_email, res_id)
             except ValueError:
                 print("Incorrect reservation id")
-        else:
+        elif choice == "4":
             print("Thank you for using the Library System. Goodbye!")
             exit()
+        else:
+            print("Incorrect choice - choose value from 1 to 4")
 
 
 if __name__ == "__main__":
