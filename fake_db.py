@@ -62,7 +62,7 @@ class FakeDB(DB):
         del self._reservations_by_book[book_id]
         del self._reservations[res_id]
 
-    def add_new_reservation(self, book_id, email):
+    def add_new_reservation(self, book_id, email) -> bool:
         newreskey = max(self._reservations.keys()) + 1
         self._reservations[newreskey] = {
             "book_id": book_id,
@@ -72,3 +72,4 @@ class FakeDB(DB):
             "id": newreskey,
             "email": email,
         }
+        return True

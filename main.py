@@ -107,11 +107,13 @@ def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email, auto=
         else:
             confirmation = input("Confirm the above reservation? (yes/no): ")
         if confirmation == "yes":
+            reserved = 0
             for key in book_choices:
-                db.add_new_reservation(key, user_email)
-
+                success = db.add_new_reservation(key, user_email)
+                if success:
+                    reserved += 1
             if not auto:
-                print(f"You reserved {len(book_choices)} books.")
+                print(f"You reserved {reserved} books.")
             break
         elif confirmation == "no":
             print("Purchase cancelled.")

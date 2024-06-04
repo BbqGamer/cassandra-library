@@ -36,5 +36,5 @@ class DB(Protocol):
     def delete_reservation(self, res_id):
         ...
 
-    def add_new_reservation(self, book_id, email):
+    def add_new_reservation(self, book_id, email) -> bool:
         ...

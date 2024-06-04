@@ -59,7 +59,10 @@ class CassandraDB(DB):
                 (reservation.book_id, res_id),
             )
 
-    def add_new_reservation(self, book_id, email):
+    def add_new_reservation(self, book_id, email) -> bool:
+        if self.select_reservation_by_book(book_id) is not None:
+            return False
+
         newresid = uuid.uuid4()
         query = (
             "INSERT INTO library.reservations (id, book_id, email) VALUES (%s, %s, %s)"
@@ -68,3 +71,4 @@ class CassandraDB(DB):
         query = """
         INSERT INTO library.reservations_by_book (book_id, id, email) VALUES (%s, %s, %s)"""
         self.session.execute(query, (book_id, newresid, email))
+        return True
