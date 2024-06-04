@@ -100,17 +100,18 @@ def cancel_reservation(db: DB, user_email: str, res_id: uuid.UUID):
     print(f"Reservation with {COLOR_BLUE}ID:{COLOR_RESET} {res_id} cancelled")
 
 
-def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email):
-    print("\n[CHOICES]")
-    display_books(db, book_choices)
-
+def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email, auto=False):
     while True:
-        confirmation = input("Confirm the above reservation? (yes/no): ")
+        if auto:
+            confirmation = "yes"
+        else:
+            confirmation = input("Confirm the above reservation? (yes/no): ")
         if confirmation == "yes":
             for key in book_choices:
                 db.add_new_reservation(key, user_email)
 
-            print(f"You reserved {len(book_choices)} books.")
+            if not auto:
+                print(f"You reserved {len(book_choices)} books.")
             break
         elif confirmation == "no":
             print("Purchase cancelled.")
@@ -139,6 +140,8 @@ def run():
             display_books(db)
             book_choices = select_books(db)
             if book_choices:
+                print("\n[CHOICES]")
+                display_books(db, book_choices)
                 confirm_reservation(db, book_choices, logged_user_email)
         elif choice == "2":
             display_reservations(db)
