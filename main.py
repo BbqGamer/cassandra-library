@@ -35,7 +35,7 @@ def display_reservations(db: DB, user_email=None):
             continue
         book = db.select_books_by_ids([reservation.book_id])[0]
         print(
-            f"{COLOR_BLUE}{reservation.id}{COLOR_RESET} - {book.title} - reserved by {reservation.email}"
+            f"{COLOR_BLUE}{reservation.id}{COLOR_RESET} - {book.title} - reserved by {BOLD}{reservation.email}{COLOR_RESET}"
         )
 
 

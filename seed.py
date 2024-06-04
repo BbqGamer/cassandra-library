@@ -58,7 +58,7 @@ def seed():
     session.execute("TRUNCATE library.reservations_by_book;")
     print("Cleaned data")
 
-    print("[SEEDING]")
+    print("Seeding...")
     with open(BOOKS_FILE, "r") as f:
         cr = csv.reader(f)
         _ = next(cr)

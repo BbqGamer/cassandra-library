@@ -6,7 +6,7 @@ from cassandra_db import CassandraDB
 from main import confirm_reservation, display_reservations
 from seed import seed
 
-MAX_WORKERS = 10
+MAX_WORKERS = 16
 
 
 def stress_1(db):
@@ -16,9 +16,7 @@ def stress_1(db):
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         for _ in range(NUM_ITERS):
-            executor.submit(
-                confirm_reservation, db, [book_id], "tester@gmail.com", True
-            )
+            executor.submit(confirm_reservation, db, [book_id], "tester", True)
 
 
 def stress_2(db):
@@ -33,7 +31,7 @@ def stress_2(db):
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         for _ in range(NUM_ITERS // 2):
-            for user_email in ["first@test.com", "second@test.com"]:
+            for user_email in ["foo", "bar"]:
                 executor.submit(random_request, user_email, books)
 
 
@@ -56,6 +54,7 @@ def run_test(func):
     func(db)
     print(f"Finished running {func.__name__} in: {time.time()-start:.2f} seconds")
     display_reservations(db)
+    print()
 
 
 if __name__ == "__main__":
