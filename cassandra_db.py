@@ -52,23 +52,21 @@ class CassandraDB(DB):
         reservation = self.select_reservation_by_id(res_id)
         if reservation:
             self.session.execute(
-                "DELETE FROM library.reservations WHERE id = %s", (res_id,)
+                "DELETE FROM library.reservations WHERE id = %s IF EXISTS", (res_id,)
             )
             self.session.execute(
-                "DELETE FROM library.reservations_by_book WHERE book_id = %s AND id = %s",
+                "DELETE FROM library.reservations_by_book WHERE book_id = %s AND id = %s IF EXISTS",
                 (reservation.book_id, res_id),
             )
 
     def add_new_reservation(self, book_id, email) -> bool:
-        if self.select_reservation_by_book(book_id) is not None:
-            return False
+        res_id = uuid.uuid4()
+        query = """INSERT INTO library.reservations_by_book (book_id, id, email)
+        VALUES (%s, %s, %s) IF NOT EXISTS"""
+        result = self.session.execute(query, (book_id, res_id, email))
 
-        newresid = uuid.uuid4()
-        query = (
-            "INSERT INTO library.reservations (id, book_id, email) VALUES (%s, %s, %s)"
-        )
-        self.session.execute(query, (newresid, book_id, email))
-        query = """
-        INSERT INTO library.reservations_by_book (book_id, id, email) VALUES (%s, %s, %s)"""
-        self.session.execute(query, (book_id, newresid, email))
-        return True
+        if result.was_applied:
+            query = "INSERT INTO library.reservations (id, book_id, email) VALUES (%s, %s, %s)"
+            self.session.execute(query, (res_id, book_id, email))
+            return True
+        return False

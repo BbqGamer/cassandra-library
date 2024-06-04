@@ -12,8 +12,10 @@ MAX_WORKERS = 10
 def stress_1(db):
     """The client makes the same request very quickly (10000 times)."""
     book_id = db.select_all_books()[0].id
+    NUM_ITERS = 10000
+
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        for _ in range(10000):
+        for _ in range(NUM_ITERS):
             executor.submit(
                 confirm_reservation, db, [book_id], "tester@gmail.com", True
             )
@@ -22,6 +24,7 @@ def stress_1(db):
 def stress_2(db):
     """Two or more clients make the possible requests randomly (10000 times)."""
     books = db.select_all_books()
+    NUM_ITERS = 10000
 
     def random_request(user_email, books):
         num_chosen = random.randint(0, len(books) - 1)
@@ -29,7 +32,7 @@ def stress_2(db):
         confirm_reservation(db, books_ids, user_email, auto=True)
 
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        for _ in range(10000 // 2):
+        for _ in range(NUM_ITERS // 2):
             for user_email in ["first@test.com", "second@test.com"]:
                 executor.submit(random_request, user_email, books)
 
