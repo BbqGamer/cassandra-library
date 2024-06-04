@@ -1,5 +1,4 @@
 import uuid
-from time import sleep
 from typing import List
 
 from cassandra_db import CassandraDB
