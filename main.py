@@ -30,14 +30,23 @@ def display_books(db: DB, book_ids=None):
 
 
 def display_reservations(db: DB, user_email=None):
+    reservations = db.select_all_reservations()
+    if user_email is not None:
+        reservations = list(filter(lambda res: res.email == user_email, reservations))
+        if len(reservations) == 0:
+            print("[YOU DON'T HAVE ANY RESERVATIONS]")
+            return False
+
+    if len(reservations) == 0:
+        print("[THERE ARE CURRENTLY NO RESERVATIONS]")
+        return False
     print("\n[RESERVATIONS]")
-    for reservation in db.select_all_reservations():
-        if user_email is not None and reservation.email != user_email:
-            continue
+    for reservation in reservations:
         book = db.select_books_by_ids([reservation.book_id])[0]
         print(
             f"{COLOR_BLUE}{reservation.id}{COLOR_RESET} - {book.title} - reserved by {BOLD}{reservation.email}{COLOR_RESET}"
         )
+    return True
 
 
 def select_books(db: DB):
@@ -149,15 +158,16 @@ def run():
         elif choice == "2":
             display_reservations(db)
         elif choice == "3":
-            display_reservations(db, logged_user_email)
-            try:
-                res_id = input(
-                    f"\nSpecify {COLOR_BLUE}ID{COLOR_RESET} of reservation to remove (or empty string to cancel operation): "
-                )
-                if res_id:
-                    cancel_reservation(db, logged_user_email, uuid.UUID(res_id))
-            except ValueError:
-                print(f"Incorrect reservation {COLOR_BLUE}UUID{COLOR_RESET}")
+            has_any = display_reservations(db, logged_user_email)
+            if has_any:
+                try:
+                    res_id = input(
+                        f"\nSpecify {COLOR_BLUE}ID{COLOR_RESET} of reservation to remove (or empty string to cancel operation): "
+                    )
+                    if res_id:
+                        cancel_reservation(db, logged_user_email, uuid.UUID(res_id))
+                except ValueError:
+                    print(f"Incorrect reservation {COLOR_BLUE}UUID{COLOR_RESET}")
         elif choice == "4":
             print("Thank you for using the Library System. Goodbye!")
             exit()

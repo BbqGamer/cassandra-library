@@ -52,12 +52,14 @@ class CassandraDB(DB):
         reservation = self.select_reservation_by_id(res_id)
         if reservation:
             self.session.execute(
-                "DELETE FROM library.reservations WHERE id = %s IF EXISTS", (res_id,)
+                "DELETE FROM library.reservations WHERE id = %s", (res_id,)
             )
             self.session.execute(
-                "DELETE FROM library.reservations_by_book WHERE book_id = %s AND id = %s IF EXISTS",
-                (reservation.book_id, res_id),
+                "DELETE FROM library.reservations_by_book WHERE book_id = %s",
+                (reservation.book_id,),
             )
+        else:
+            print("Reservation not found!")
 
     def add_new_reservation(self, book_id, email) -> bool:
         res_id = uuid.uuid4()
