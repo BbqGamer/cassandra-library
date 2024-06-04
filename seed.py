@@ -13,9 +13,6 @@ def seed():
     cluster = Cluster([("127.0.0.1", 9042), ("127.0.0.1", 9043), ("127.0.0.1", 9044)])
     session = cluster.connect()
 
-    print("Cleaning keyspace")
-    session.execute("DROP KEYSPACE IF EXISTS library")
-
     keyspace_query = """
     CREATE KEYSPACE IF NOT EXISTS library
     WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}
@@ -47,15 +44,19 @@ def seed():
 
     reservations_by_book_query = """
     CREATE TABLE IF NOT EXISTS library.reservations_by_book (
-        book_id UUID,
+        book_id UUID PRIMARY KEY,
         id UUID,
         email TEXT,
-        PRIMARY KEY (book_id, id)
     );
     """
 
     session.execute(reservations_by_book_query)
     print("Created reservations by book table")
+
+    session.execute("TRUNCATE library.books;")
+    session.execute("TRUNCATE library.reservations;")
+    session.execute("TRUNCATE library.reservations_by_book;")
+    print("Cleaned data")
 
     print("[SEEDING]")
     with open(BOOKS_FILE, "r") as f:
