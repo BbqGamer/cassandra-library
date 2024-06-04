@@ -6,6 +6,7 @@ from cassandra.cluster import Cluster
 
 
 def seed():
+    print("[SEEDING]")
     BOOKS_FILE = "data/books.csv"
     if not os.path.exists(BOOKS_FILE):
         print("Books dataset should be in path: ", BOOKS_FILE)
@@ -58,7 +59,7 @@ def seed():
     session.execute("TRUNCATE library.reservations_by_book;")
     print("Cleaned data")
 
-    print("Seeding...")
+    print("Inserting data...")
     with open(BOOKS_FILE, "r") as f:
         cr = csv.reader(f)
         _ = next(cr)

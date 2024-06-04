@@ -1,4 +1,5 @@
 import random
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -41,8 +42,9 @@ def stress_3(db):
     A situation where one client claims all Is undesirable"""
     all_book_ids = [book.id for book in db.select_all_books()]
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        executor.submit(confirm_reservation, db, all_book_ids, "foo", True)
-        executor.submit(confirm_reservation, db, all_book_ids, "bar", True)
+        for book_id in all_book_ids:
+            executor.submit(confirm_reservation, db, [book_id], "foo", True)
+            executor.submit(confirm_reservation, db, [book_id], "bar", True)
 
 
 def run_test(func):
@@ -58,6 +60,18 @@ def run_test(func):
 
 
 if __name__ == "__main__":
-    run_test(stress_1)
-    run_test(stress_2)
-    run_test(stress_3)
+    to_run = set([1, 2, 3])
+    if len(sys.argv) >= 1:
+        try:
+            to_run = set(map(int, sys.argv[1].split(",")))
+        except Exception:
+            print("Usage [python3 stress_test.py 1,2] (comma separated list of tests)")
+
+    if 1 in to_run:
+        run_test(stress_1)
+
+    if 2 in to_run:
+        run_test(stress_2)
+
+    if 3 in to_run:
+        run_test(stress_3)

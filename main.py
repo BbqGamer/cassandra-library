@@ -1,4 +1,5 @@
 import uuid
+from time import sleep
 from typing import List
 
 from cassandra_db import CassandraDB
@@ -106,7 +107,7 @@ def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email, auto=
             confirmation = "yes"
         else:
             confirmation = input("Confirm the above reservation? (yes/no): ")
-        if confirmation == "yes":
+        if confirmation == "yes" or confirmation == "y":
             reserved = 0
             for key in book_choices:
                 success = db.add_new_reservation(key, user_email)
@@ -115,7 +116,7 @@ def confirm_reservation(db: DB, book_choices: List[uuid.UUID], user_email, auto=
             if not auto:
                 print(f"You reserved {reserved} books.")
             break
-        elif confirmation == "no":
+        elif confirmation == "no" or confirmation == "n":
             print("Purchase cancelled.")
             break
         else:
