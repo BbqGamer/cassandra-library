@@ -2,6 +2,9 @@
 Project for Big Data and Distributed Systems in PUT Poznań University of Technology. \
 The project is a distributed system for a **library**, where you can reserve **books**.
 
+## Author
+**Adam Korba** (index 151962)
+
 # Report
 Report for this project [is availible here](report.md)
 
