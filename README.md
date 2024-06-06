@@ -9,6 +9,12 @@ The project is a distributed system for a **library**, where you can reserve **b
 Report for this project [is availible here](report.md)
 
 # How to run
+0. Install required packages
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 1. Fetch the data
 ```
 mkdir data
