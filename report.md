@@ -1,5 +1,50 @@
+# Description
+## Project specification
+The project is a distributed system for a **library**. It allows you to *view* available **books**
+and *reserve* them. Later system allows you to manage your reservations, you can *cancel* (update) them.
+System consists of cassandra cluster where all the data is stored and a cli client script to
+communicate with the cluster.
+
+## Workflow
+When working with databases like cassandra it is a good idea to start with the application and only
+then design the schema (in contrast to relational DBs where we usually start with a schema).
+So I began by writting the [CLI script](main.py) using a [fake database](fake_db.py). While doing that I
+saw which operations are the most needed in my system and was able to come up with the optimal
+schema for Cassandra which balances efficiency and redundancy.
+
+# Database schema
+```mermaid
+---
+title: library keyspace
+---
+classDiagram 
+    direction LR
+    class books {
+        id: UUID (PRIMARY KEY)
+        title: str
+        author: str
+    }
+    
+    class reservations {
+        id: UUID (PRIMARY KEY)
+        book_id: UUID
+        email: str
+    }
+    
+    class reservations_by_book {
+        book_id: UUID (PRIMARY KEY)
+        id: UUID
+        email: str
+    }
+```
+I implemented the [cassandra database connection](cassandra_db.py) by implementing the same interface as
+in the fake database. Then I needed to populate the DB. I wrote a script to obtain the data from web [fetch_data.py](The database)
+And the [seeding script](seed.py) to setup keyspace, tables and insert the data into the cluster.
+Cluster is being started by the [docker compose file](docker-compose.yml) (I am starting 3 nodes).
+
+# Problems encountered
 ## Synchronization Problems
-After writing stress tests utilizing concurrency I ran into the following problem: 
+After writing [stress tests](stress_tests.py) utilizing concurrency I ran into the following problem: 
 multiple reservations were created for the same book
 
 #### Test 1 partial results
